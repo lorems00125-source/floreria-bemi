@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florería BEMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:#fdfdfd;color:#333;}
+
+header{background:#c62828;color:#fff;padding:1rem;text-align:center;font-size:1.5rem;font-weight:600;}
+nav{display:flex;justify-content:center;gap:1rem;padding:1rem;background:#f4f4f4;flex-wrap:wrap;}
+nav button{background:#c62828;color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;font-weight:600;transition:background 0.3s;}
+nav button:hover{background:#a31e1e;}
+
+/* 🔹 Instrucciones */
+.instrucciones{background:#fff8f8;border:1px solid #f3d1d1;padding:1rem 1.5rem;margin:1.5rem auto;border-radius:10px;max-width:800px;text-align:left;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
+.instrucciones h2{color:#c62828;margin-bottom:0.5rem;font-size:1.3rem;}
+.instrucciones p{margin:0.3rem 0;font-size:0.95rem;}
+
+main{padding:1rem;}
+h2{text-align:center;margin-bottom:1rem;color:#c62828;}
+
+.productos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
+.producto{background:white;padding:1rem;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1);text-align:center;transition:transform 0.3s ease, opacity 0.3s ease;opacity:0;transform:translateY(20px);}
+.producto.visible{opacity:1;transform:translateY(0);}
+.producto img{max-width:100%;height:180px;object-fit:cover;border-radius:10px;margin-bottom:0.5rem;transition: transform 0.4s ease;}
+.producto img:hover{transform:scale(1.1);}
+.producto h3{margin:0.5rem 0;font-size:1rem;color:#444;}
+.producto p{font-size:0.9rem;margin:0.3rem 0;}
+.producto strong{color:#c62828;font-size:1.1rem;}
+.producto button{margin-top:0.5rem;background:#c62828;color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;transition:background 0.3s;}
+.producto button:hover{background:#a31e1e;}
+
+/* 🔹 Carrito */
+.carrito{position:fixed;right:1rem;bottom:1rem;background:white;border:1px solid #ddd;padding:1rem;border-radius:10px;width:280px;max-height:400px;overflow:auto;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
+.carrito h3{margin-bottom:0.5rem;color:#c62828;}
+.carrito ul{list-style:none;padding:0;}
+.carrito li{margin-bottom:0.5rem;font-size:0.9rem;}
+.carrito strong{display:block;margin-top:0.5rem;}
+.whatsapp-btn{margin-top:0.5rem;background:#25D366;color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;font-weight:600;width:100%;transition:background 0.3s;}
+.whatsapp-btn:hover{background:#1ebe5a;}
+
+/* 🔹 Panel edición productos (solo tú) */
+.panel-edit{position:fixed;left:1rem;top:1rem;background:#fff;border:1px solid #ddd;padding:1rem;border-radius:10px;max-height:90vh;overflow:auto;width:280px;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:1000;}
+.panel-edit h3{color:#c62828;margin-bottom:0.5rem;text-align:center;}
+.panel-edit label{display:block;margin-top:0.5rem;font-weight:600;}
+.panel-edit input{width:100%;padding:0.3rem;margin-top:0.2rem;border:1px solid #ccc;border-radius:5px;}
+.panel-edit button{margin-top:0.5rem;width:100%;background:#c62828;color:white;border:none;padding:0.5rem;border-radius:5px;cursor:pointer;transition:background 0.3s;}
+.panel-edit button:hover{background:#a31e1e;}
+</style>
+</head>
+<body>
+
+<header>🌹 Florería BEMI 🌻</header>
+
+<!-- 🔹 Bloque de instrucciones -->
+<section class="instrucciones">
+  <h2>📝 ¿Cómo comprar?</h2>
+  <p>1. Selecciona la categoría del producto (Rosas, Girasoles, Complementos o Cajas).</p>
+  <p>2. Haz clic en <strong>"Agregar al carrito"</strong> en los productos que desees.</p>
+  <p>3. Revisa tu carrito en la parte derecha de la pantalla.</p>
+  <p>4. Cuando estés listo, haz clic en <strong>"Finalizar compra"</strong> y se abrirá WhatsApp con tu pedido listo para enviar.</p>
+</section>
+
+<nav>
+  <button onclick="cargarSeccion(0)">Rosas Rojas</button>
+  <button onclick="cargarSeccion(1)">Girasoles</button>
+  <button onclick="cargarSeccion(2)">Complementos</button>
+  <button onclick="cargarSeccion(3)">Cajas</button>
+</nav>
+
+<main>
+  <h2 id="titulo-seccion">Rosas Rojas</h2>
+  <div id="productos" class="productos"></div>
+</main>
+
+<div class="carrito">
+  <h3>🛒 Carrito</h3>
+  <ul id="lista-carrito"></ul>
+  <strong>Total: $<span id="total">0.00</span></strong>
+  <button class="whatsapp-btn" onclick="finalizarCompra()">Finalizar compra</button>
+</div>
+
+<!-- 🔹 Panel edición productos (solo tú) -->
+<div class="panel-edit">
+  <h3>Panel de Edición</h3>
+  <label>Nombre del producto:</label>
+  <input type="text" id="edit-nombre">
+  <label>Descripción:</label>
+  <input type="text" id="edit-descripcion">
+  <label>Precio:</label>
+  <input type="number" id="edit-precio">
+  <button onclick="guardarEdicion()">Guardar cambios</button>
+</div>
+
+<script>
+let secciones = [
+  {
+    nombre:"Rosas Rojas",
+    productos:[
+      {nombre:"Ramo Rosas 1", precio:15, descripcion:"Ramo de 12 rosas rojas", imagen:"img/index/rosasrojas/1.jpeg"},
+      {nombre:"Ramo Rosas 2", precio:16, descripcion:"Rosas con envoltura elegante", imagen:"img/index/rosasrojas/2.jpeg"},
+      {nombre:"Ramo Rosas 3", precio:17, descripcion:"Rosas con lazo de seda", imagen:"img/index/rosasrojas/3.jpeg"},
+      {nombre:"Ramo Rosas 4", precio:18, descripcion:"Rosas premium", imagen:"img/index/rosasrojas/4.jpeg"},
+      {nombre:"Ramo Rosas 5", precio:19, descripcion:"Rosas con chocolates", imagen:"img/index/rosasrojas/5.jpeg"},
+      {nombre:"Ramo Rosas 6", precio:20, descripcion:"Rosas con tarjeta personalizada", imagen:"img/index/rosasrojas/6.jpeg"},
+      {nombre:"Ramo Rosas 7", precio:21, descripcion:"Rosas con tul blanco", imagen:"img/index/rosasrojas/7.jpeg"},
+      {nombre:"Ramo Rosas 8", precio:22, descripcion:"Rosas con papel dorado", imagen:"img/index/rosasrojas/8.jpeg"},
+      {nombre:"Ramo Rosas 9", precio:23, descripcion:"Rosas con caja especial", imagen:"img/index/rosasrojas/9.jpeg"},
+      {nombre:"Ramo Rosas 10", precio:24, descripcion:"Rosas con globo sorpresa", imagen:"img/index/rosasrojas/10.jpeg"}
+    ]
+  },
+  {
+    nombre:"Girasoles",
+    productos:[
+      {nombre:"Ramo Girasoles 1", precio:18, descripcion:"Ramo de 5 girasoles", imagen:"img/index/girasoles/1.jpeg"},
+      {nombre:"Ramo Girasoles 2", precio:19, descripcion:"Girasoles con envoltura rústica", imagen:"img/index/girasoles/2.jpeg"},
+      {nombre:"Ramo Girasoles 3", precio:20, descripcion:"Girasoles con cinta amarilla", imagen:"img/index/girasoles/3.jpeg"},
+      {nombre:"Ramo Girasoles 4", precio:21, descripcion:"Girasoles premium", imagen:"img/index/girasoles/4.jpeg"},
+      {nombre:"Ramo Girasoles 5", precio:22, descripcion:"Girasoles con chocolates", imagen:"img/index/girasoles/5.jpeg"},
+      {nombre:"Ramo Girasoles 6", precio:23, descripcion:"Girasoles con tarjeta", imagen:"img/index/girasoles/6.jpeg"},
+      {nombre:"Ramo Girasoles 7", precio:24, descripcion:"Girasoles en caja", imagen:"img/index/girasoles/7.jpeg"},
+      {nombre:"Ramo Girasoles 8", precio:25, descripcion:"Girasoles con tul blanco", imagen:"img/index/girasoles/8.jpeg"},
+      {nombre:"Ramo Girasoles 9", precio:26, descripcion:"Girasoles premium con cinta", imagen:"img/index/girasoles/9.jpeg"},
+      {nombre:"Ramo Girasoles 10", precio:27, descripcion:"Girasoles con globo sorpresa", imagen:"img/index/girasoles/10.jpeg"}
+    ]
+  },
+  {
+    nombre:"Complementos",
+    productos:[
+      {nombre:"Complemento 1", precio:5, descripcion:"Peluche pequeño", imagen:"img/index/complementos/1.jpeg"},
+      {nombre:"Complemento 2", precio:6, descripcion:"Caja de chocolates", imagen:"img/index/complementos/2.jpeg"},
+      {nombre:"Complemento 3", precio:7, descripcion:"Tarjeta personalizada", imagen:"img/index/complementos/3.jpeg"},
+      {nombre:"Complemento 4", precio:8, descripcion:"Vino pequeño", imagen:"img/index/complementos/4.jpeg"},
+      {nombre:"Complemento 5", precio:9, descripcion:"Globo helio", imagen:"img/index/complementos/5.jpeg"},
+      {nombre:"Complemento 6", precio:10, descripcion:"Caja sorpresa", imagen:"img/index/complementos/6.jpeg"},
+      {nombre:"Complemento 7", precio:11, descripcion:"Peluche mediano", imagen:"img/index/complementos/7.jpeg"},
+      {nombre:"Complemento 8", precio:12, descripcion:"Vino grande", imagen:"img/index/complementos/8.jpeg"},
+      {nombre:"Complemento 9", precio:13, descripcion:"Set de dulces", imagen:"img/index/complementos/9.jpeg"},
+      {nombre:"Complemento 10", precio:14, descripcion:"Caja premium", imagen:"img/index/complementos/10.jpeg"}
+    ]
+  },
+  {
+    nombre:"Cajas",
+    productos:[
+      {nombre:"Caja 1", precio:25, descripcion:"Caja elegante de rosas", imagen:"img/index/cajas/1.jpeg"},
+      {nombre:"Caja 2", precio:26, descripcion:"Caja mediana con flores mixtas", imagen:"img/index/cajas/2.jpeg"},
+      {nombre:"Caja 3", precio:27, descripcion:"Caja premium con chocolates", imagen:"img/index/cajas/3.jpeg"},
+      {nombre:"Caja 4", precio:28, descripcion:"Caja romántica con globos", imagen:"img/index/cajas/4.jpeg"},
+      {nombre:"Caja 5", precio:29, descripcion:"Caja de lujo personalizada", imagen:"img/index/cajas/5.jpeg"},
+      {nombre:"Caja 6", precio:30, descripcion:"Caja sorpresa con vino", imagen:"img/index/cajas/6.jpeg"},
+      {nombre:"Caja 7", precio:31, descripcion:"Caja elegante con tul", imagen:"img/index/cajas/7.jpeg"},
+      {nombre:"Caja 8", precio:32, descripcion:"Caja especial de aniversario", imagen:"img/index/cajas/8.jpeg"},
+      {nombre:"Caja 9", precio:33, descripcion:"Caja premium con peluche", imagen:"img/index/cajas/9.jpeg"},
+      {nombre:"Caja 10", precio:34, descripcion:"Caja con flores y globos", imagen:"img/index/cajas/10.jpeg"}
+    ]
+  }
+];
+
+let carrito = [];
+let indiceSeccion = 0;
+let indiceProducto = null;
+
+// 🔹 Funciones
+function cargarSeccion(index){
+  indiceSeccion = index;
+  const cont = document.getElementById("productos");
+  const seccion = secciones[index];
+  document.getElementById("titulo-seccion").textContent = seccion.nombre;
+  cont.innerHTML = "";
+
+  seccion.productos.forEach((producto,i)=>{
+    const div = document.createElement("div");
+    div.className="producto";
+    div.innerHTML=`
+      <img src="${producto.imagen}" alt="${producto.nombre}">
+      <h3>${producto.nombre}</h3>
+      <p>${producto.descripcion}</p>
+      <p><strong>$${producto.precio.toFixed(2)}</strong></p>
+      <button onclick="agregarCarrito(${i})">Agregar al carrito</button>
+      <button onclick="editarProducto(${i})">✏️ Editar</button>
+    `;
+    cont.appendChild(div);
+    setTimeout(()=>{div.classList.add('visible');}, i*100);
+  });
+}
+
+function agregarCarrito(i){
+  const prod = secciones[indiceSeccion].productos[i];
+  carrito.push(prod);
+  renderCarrito();
+}
+
+function renderCarrito(){
+  const lista = document.getElementById("lista-carrito");
+  const total = document.getElementById("total");
+  lista.innerHTML="";
+  let suma=0;
+  carrito.forEach(item=>{
+    suma+=item.precio;
+    const li=document.createElement("li");
+    li.textContent=`${item.nombre} - $${item.precio.toFixed(2)}`;
+    lista.appendChild(li);
+  });
+  total.textContent=suma.toFixed(2);
+}
+
+function finalizarCompra(){
+  if(carrito.length===0){alert("El carrito está vacío"); return;}
+  let mensaje="Hola! Quiero hacer este pedido:%0A%0A";
+  let total=0;
+  carrito.forEach(item=>{mensaje+=`- ${item.nombre} ($${item.precio.toFixed(2)})%0A`; total+=item.precio;});
+  mensaje+=`%0ATotal: $${total.toFixed(2)}`;
+  window.open(`https://wa.me/593959450987?text=${mensaje}`,"_blank");
+}
+
+// 🔹 Panel edición
+function editarProducto(i){
+  indiceProducto=i;
+  const prod = secciones[indiceSeccion].productos[i];
+  document.getElementById("edit-nombre").value=prod.nombre;
+  document.getElementById("edit-descripcion").value=prod.descripcion;
+  document.getElementById("edit-precio").value=prod.precio;
+}
+
+function guardarEdicion(){
+  if(indiceProducto===null) return;
+  const prod = secciones[indiceSeccion].productos[indiceProducto];
+  prod.nombre = document.getElementById("edit-nombre").value;
+  prod.descripcion = document.getElementById("edit-descripcion").value;
+  prod.precio = parseFloat(document.getElementById("edit-precio").value);
+  cargarSeccion(indiceSeccion);
+}
+
+cargarSeccion(0);
+renderCarrito();
+</script>
+
+</body>
+</html>
